@@ -1,119 +1,186 @@
 #include <iostream>
+using namespace std;
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "estados.h"
+#include "lista_eventos.h"
 
-using namespace std;
-
-class Estado
+char recibir_entrada()
 {
-public:
-    virtual void procesar_estado() = 0;
-};
+    /**
+    Funcion que itera hasta recibir una entrada valida S o N.
 
-class Reposo : public Estado
-{
-public:
-    void procesar_estado()
+    Si se ingresa S, se repetira la simulacion.
+    Si se ingresa N, se finaliza la ejecucion del programa.
+
+    recibir_entrada() retorna el caracter 'S' o 'N' ingresado.*/
+
+    char c;
+    while (true)
     {
-        cout << "Estoy en Reposo" << endl;
-    }
-};
+        cout << "Ingrese su respuesta (S/N): " << endl;
+        scanf("%c", &c);
+        getchar();
 
-class Turno_J1_Boton_Pulsado : public Estado
-{
-public:
-    void procesar_estado()
-    {
-        cout << "Soy el jugador 1, estoy jugando al ajedrez mientras mantego apretado el boton como un salame" << endl;
-    }
-};
+        c = toupper(c);
 
-class Turno_J1 : public Estado
-{
-public:
-    void procesar_estado()
-    {
-        cout << "Soy el jugador 1, ya no apreto el botón pero sigo siendo un salame" << endl;
-    }
-};
-
-// *******************************************  Clase Evento
-
-class Evento
-{
-public:
-    bool s1;
-    bool s2;
-    Evento *sig;
-
-    Evento(bool s1, bool s2, Evento *sig) {
-        this.s1 = s1;
-        this.s2 = s2;
-        this.sig = sig;
-    }
-};
-
-// *******************************************  CLASE DE LA LISTA ENLAZADA
-
-class Lista_Enlazada
-{
-private:
-    // **************************************  MÉTODOS Y COSAS PRIVADAS
-    Evento *lista;
-
-    Evento *crear_lista_eventos(int cantidad)
-    {
-        // Crea una lista de eventos del largo adecuado, con informacion generada en forma aleatoria, en forma recursiva
-        return new Evento(rand() % 2, rand() % 2, (cantidad > 1) ? crear_lista_eventos(cantidad - 1) : NULL);
-    }
-
-    void liberar_memoria(Evento *evento)
-    {
-        /*
-         * Función recursiva que toma como parámetro un puntero a un evento de la lista,
-         * si no es el último se llama a si misma pasando como parámetro el puntero al próximo elemento.
-         * De esta forma se va liberando la memoria desde el ultimo elemento al primero.
-         */
-
-        if (evento->sig != NULL)
+        if (c == 'N' || c == 'S')
         {
-            liberar_memoria(evento->sig);
+            return c;
         }
-        free(evento);
+        else
+        {
+            cout << "Opcion invalida, intente otra vez:\n"
+                 << endl;
+        }
     }
+}
 
-public:
-    // **************************************  CONSTRUCTOR
-    Lista_Enlazada(int largo)
-    {
-        lista = crear_lista_eventos(largo);
-    }
-
-    // **************************************  DESTRUCTOR
-    ~Lista_Enlazada()
-    {
-        liberar_memoria(lista);
-    }
-
-    void procesar_estado()
-    {
-        cout << "Soy el jugador 1, estoy jugando al ajedrez mientras mantego apretado el boton como un salame" << endl;
-    }
-};
-
-int main()
+void correr_simulacion(Lista_Enlazada *lista)
 {
-    srand(time(NULL));
+    Mediciones *medicion;
 
     Estado *estado_actual = new Reposo();
 
-    estado_actual->procesar_estado();
+    estado_actual->imprimir_estado();
 
-    delete estado_actual;
+    bool boton, fin;
 
-    Lista_Enlazada *lista = new Lista_Enlazada(45);
+    while ((medicion = lista->get_nodo()) != NULL)
+    {
+        boton = medicion->get_boton();
+        fin = medicion->get_fin();
 
-    cout << "Hello world!" << endl;
+        // El jugador 1 presiona el botón por primera vez
+        if (boton == 0 && estado_actual->get_etiqueta() == REPOSO)
+        {
+            delete estado_actual;
+            estado_actual = new Turno_J1_Boton_Pulsado();
+        }
+        // Si el jugador 1 suelta el botón
+        else if (boton == 1 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J1_BOTON_PULSADO)
+        {
+            delete estado_actual;
+            estado_actual = new Turno_J1();
+        }
+        // El jugador 2 presiona el botón
+        else if (boton == 0 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J1)
+        {
+            delete estado_actual;
+            estado_actual = new Turno_J2_Boton_Pulsado();
+        }
+        // El jugador 2 suelta el botón
+        else if (boton == 1 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J2_BOTON_PULSADO)
+        {
+            delete estado_actual;
+            estado_actual = new Turno_J2();
+        }
+        // El jugador 1 vuelve a presionar el boton
+        else if (boton == 0 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J2)
+        {
+            delete estado_actual;
+            estado_actual = new Turno_J1_Boton_Pulsado();
+        }
+        // Se le termina el tiempo al jugador 1
+        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J1_BOTON_PULSADO)
+        {
+            delete estado_actual;
+            estado_actual = new Termina_Tiempo_J1();
+        }
+        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J2)
+        {
+            delete estado_actual;
+            estado_actual = new Termina_Tiempo_J1();
+        }
+        // Se le termina el tiempo al jugador 2
+        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J2_BOTON_PULSADO)
+        {
+            delete estado_actual;
+            estado_actual = new Termina_Tiempo_J2();
+        }
+        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J1)
+        {
+            delete estado_actual;
+            estado_actual = new Termina_Tiempo_J2();
+        }
+        // Vuelve a reset despues de que se les termina el tiempo
+        else if (boton == 1 && fin == 1 && (estado_actual->get_etiqueta() == TERMINA_TIEMPO_J1 || estado_actual->get_etiqueta() == TERMINA_TIEMPO_J2))
+        {
+            delete estado_actual;
+            estado_actual = new Reposo();
+        }
+        // Se pide un reset
+        else if (boton == 1 && fin == 1 && (estado_actual->get_etiqueta() == TURNO_J1 || estado_actual->get_etiqueta() == TURNO_J2 || estado_actual->get_etiqueta() == TURNO_J2_BOTON_PULSADO || estado_actual->get_etiqueta() == TURNO_J1_BOTON_PULSADO))
+        {
+            delete estado_actual;
+            estado_actual = new Reposo();
+        }
+        else
+        {
+            // Estado imposible o irrelevante
+            continue;
+        }
+
+        estado_actual->imprimir_estado();
+    }
+    cout << "fin de la simulacion\n\n"
+         << endl;
+}
+
+int main()
+{
+    int c_eventos;
+    bool imprimir = false;
+
+    // Utilizar diferente semilla en cada llamada a rand()
+    setbuf(stdout, 0);
+
+    srand(time(NULL));
+
+    cout << "\n\n\tBienvenido a la simulacion de ajedrez\n"
+         << endl;
+    cout << "  Desea ver las listas de eventos aleatorios que se generen? \n  Aplica a todas las simulaciones\n"
+         << endl;
+
+    Estado *esta1 = new Reposo();
+    Estado *esta2 = new Turno_J1_Boton_Pulsado();
+
+    printf("Esta1:%d   Esta2:%d  \n", esta1->get_etiqueta(), esta2->get_etiqueta());
+
+    delete esta1;
+    delete esta2;
+
+    if (recibir_entrada() == 'S')
+    {
+        imprimir = true;
+    }
+
+    while (true)
+    {
+        cout << "Ingrese la cantidad de eventos aleatorios que desea crear: " << endl;
+
+        // Leemos la cantidad de eventos
+        scanf("%d", &c_eventos);
+        getchar(); // Descarta el \n
+
+        Lista_Enlazada *lista = new Lista_Enlazada(c_eventos);
+
+        if (imprimir)
+            lista->imprimir_lista();
+
+        correr_simulacion(lista);
+
+        delete lista;
+
+        cout << "Desea realizar otra simulacion?" << endl;
+
+        if (recibir_entrada() == 'N')
+        {
+            break;
+        }
+    }
+
     return 0;
 }
 
@@ -128,13 +195,6 @@ int main()
 bool requiere_ensanche;
 unsigned char cinta;
 
-typedef struct TEvento
-{
-    bool s1;
-    bool s2;
-    struct TEvento *sig;
-} Evento;
-
 typedef enum
 {
     ALTA_VELOCIDAD,
@@ -143,31 +203,15 @@ typedef enum
     BAJA_VELOCIDAD_ENSANCHADO,
 } Estado;
 
-void imprimir_lista(Evento *lista)
-{
-
-    // Imprime la lista de eventos generados con los valores de los sensores asociados a cada evento.
-
-    Evento *p = lista;
-    while (p->sig != NULL)
-    {
-        printf("S1:%d S2:%d\n", p->s1, p->s2);
-        p = p->sig;
-    }
-    printf("S1:%d S2:%d\n", p->s1, p->s2);
-}
-
-
-
 void correr_simulacion(Evento *eventos)
 {
-    /**
-        Funcion que itera hasta recibir una entrada valida S o N.
 
-        Si se ingresa S, se repetira la simulacion.
-        Si se ingresa N, se finaliza la ejecucion del programa.
+       // Funcion que itera hasta recibir una entrada valida S o N.
 
-        recibir_entrada() retorna el caracter 'S' o 'N' ingresado.
+        //Si se ingresa S, se repetira la simulacion.
+        //Si se ingresa N, se finaliza la ejecucion del programa.
+
+        //recibir_entrada() retorna el caracter 'S' o 'N' ingresado.
 
     Evento *p = eventos;
     Estado estado_actual = ALTA_VELOCIDAD;
@@ -245,92 +289,7 @@ void correr_simulacion(Evento *eventos)
 
         p = p->sig;
     }
-    printf("Fin de la simulacion\n\n");
+    printf("fin de la simulacion\n\n");
 }
 
-char recibir_entrada()
-{
-    /**
-        Funcion que itera hasta recibir una entrada valida S o N.
-
-        Si se ingresa S, se repetira la simulacion.
-        Si se ingresa N, se finaliza la ejecucion del programa.
-
-        recibir_entrada() retorna el caracter 'S' o 'N' ingresado.
-    char c;
-    while (true)
-    {
-        printf("Ingrese su respuesta (S/N): ");
-        scanf("%c", &c);
-        getchar();
-
-        c = toupper(c);
-
-        if (c == 'N' || c == 'S')
-        {
-            return c;
-        }
-        else
-        {
-            printf("Opcion invalida, intente otra vez:\n");
-        }
-    }
-}
-
-Evento *crear_lista_eventos(int cantidad)
-{
-
-    //Crea una lista de eventos del largo adecuado, con informacion generada en forma aleatoria, en forma recursiva
-
-    Evento *lista = malloc(sizeof(Evento));
-    lista->s1 = rand() % 2;
-    lista->s2 = rand() % 2;
-    lista->sig = (cantidad > 1) ? crear_lista_eventos(cantidad - 1) : NULL;
-    return lista;
-}
-
-int main(void)
-{
-    setbuf(stdout, 0);
-    int c_eventos;
-    bool imprimir = false;
-
-    // Utilizar diferente semilla en cada llamada a rand()
-    srand(time(NULL));
-
-    printf("\n\n\tBienvenido a la simulacion de fabrica de velas\n\n");
-    printf("  Desea ver las listas de eventos aleatorios que se generen? \n  Aplica a todas las simulaciones\n\n");
-
-    if (recibir_entrada() == 'S')
-    {
-        imprimir = true;
-    }
-
-    while (true)
-    {
-        printf("Ingrese la cantidad de eventos aleatorios que desea crear: ");
-
-        // Leemos la cantidad de eventos
-        scanf("%d", &c_eventos);
-        getchar(); // Descarta el \n
-
-        Evento *lista = crear_lista_eventos(c_eventos);
-
-        if (imprimir)
-            imprimir_lista(lista);
-
-        correr_simulacion(lista);
-
-        liberar_memoria(lista);
-
-        printf("Desea realizar otra simulacion?\n");
-
-        if (recibir_entrada() == 'N')
-        {
-            break;
-        }
-    }
-    return EXIT_SUCCESS;
-}
-
-*/
+**/

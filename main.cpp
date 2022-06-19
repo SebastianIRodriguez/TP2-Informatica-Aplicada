@@ -31,8 +31,7 @@ char recibir_entrada()
         }
         else
         {
-            cout << "Opcion invalida, intente otra vez:\n"
-                 << endl;
+            cout << "Opcion invalida, intente otra vez:" << endl;
         }
     }
 }
@@ -124,8 +123,7 @@ void correr_simulacion(Lista_Enlazada *lista)
 
         estado_actual->imprimir_estado();
     }
-    cout << "fin de la simulacion\n\n"
-         << endl;
+    cout << "\nFin de la simulacion\n" << endl;
 }
 
 int main()
@@ -143,18 +141,8 @@ int main()
     cout << "  Desea ver las listas de eventos aleatorios que se generen? \n  Aplica a todas las simulaciones\n"
          << endl;
 
-    Estado *esta1 = new Reposo();
-    Estado *esta2 = new Turno_J1_Boton_Pulsado();
-
-    printf("Esta1:%d   Esta2:%d  \n", esta1->get_etiqueta(), esta2->get_etiqueta());
-
-    delete esta1;
-    delete esta2;
-
     if (recibir_entrada() == 'S')
-    {
         imprimir = true;
-    }
 
     while (true)
     {
@@ -164,6 +152,7 @@ int main()
         scanf("%d", &c_eventos);
         getchar(); // Descarta el \n
 
+        // Creamos la lista
         Lista_Enlazada *lista = new Lista_Enlazada(c_eventos);
 
         if (imprimir)
@@ -176,120 +165,8 @@ int main()
         cout << "Desea realizar otra simulacion?" << endl;
 
         if (recibir_entrada() == 'N')
-        {
             break;
-        }
     }
 
     return 0;
 }
-
-/**
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-#include <ctype.h>
-
-bool requiere_ensanche;
-unsigned char cinta;
-
-typedef enum
-{
-    ALTA_VELOCIDAD,
-    BAJA_VELOCIDAD,
-    DETENIDO_ENSANCHANDO,
-    BAJA_VELOCIDAD_ENSANCHADO,
-} Estado;
-
-void correr_simulacion(Evento *eventos)
-{
-
-       // Funcion que itera hasta recibir una entrada valida S o N.
-
-        //Si se ingresa S, se repetira la simulacion.
-        //Si se ingresa N, se finaliza la ejecucion del programa.
-
-        //recibir_entrada() retorna el caracter 'S' o 'N' ingresado.
-
-    Evento *p = eventos;
-    Estado estado_actual = ALTA_VELOCIDAD;
-
-    printf("Cinta a Alta Velocidad: \t\t\t C1 = 1 C0 = 1\t\trequiere_ensanche = 0\n");
-    requiere_ensanche = 0;
-    cinta = 3;
-
-    while (p->sig != NULL)
-    {
-        // Se detecta vela
-        if (p->s1 == 1 && p->s2 == 0 && estado_actual == ALTA_VELOCIDAD)
-        {
-            estado_actual = BAJA_VELOCIDAD;
-        }
-        // Hay que ensanchar la vela
-        else if (estado_actual == BAJA_VELOCIDAD && p->s1 == 0 && p->s2 == 0)
-        {
-            estado_actual = DETENIDO_ENSANCHANDO;
-        }
-        // Si no hay que ensanchar la vela
-        else if (p->s1 == 1 && p->s2 == 1 && estado_actual == BAJA_VELOCIDAD)
-        {
-            estado_actual = BAJA_VELOCIDAD_ENSANCHADO;
-        }
-        // Se terminó de ensanchar la vela
-        else if (estado_actual == DETENIDO_ENSANCHANDO && p->s1 == 1 && p->s2 == 1)
-        {
-            estado_actual = BAJA_VELOCIDAD_ENSANCHADO;
-        }
-        // La vela salió del proceso
-        else if (p->s1 == 0 && p->s2 == 0 && estado_actual == BAJA_VELOCIDAD_ENSANCHADO)
-        {
-            // Cortar la simulacion
-            printf("La vela abandono el puesto de control\n");
-            printf("Cinta a Alta Velocidad: \t\t\t C1 = 1 C0 = 1\t\trequiere_ensanche = 0\n");
-            requiere_ensanche = 0;
-            cinta = 3;
-            break;
-        }
-        else
-        {
-            // Estado imposible o irrelevante
-            p = p->sig;
-            continue;
-        }
-
-        switch (estado_actual)
-        {
-
-        case BAJA_VELOCIDAD:
-            printf("Cinta a Baja Velocidad: \t\t\t C1 = 1 C0 = 0 \t\trequiere_ensanche = 0\n");
-            requiere_ensanche = 0;
-            cinta = 2;
-            break;
-
-        case BAJA_VELOCIDAD_ENSANCHADO:
-            printf("Cinta a Baja Velocidad, vela correcta:\t\t C1 = 1 C0 = 0 \t\trequiere_ensanche = 0\n");
-            requiere_ensanche = 0;
-            cinta = 2;
-            break;
-
-        case ALTA_VELOCIDAD:
-            break;
-
-        case DETENIDO_ENSANCHANDO:
-            printf("Cinta detenida: \t\t\t\t C1 = 0 C0 = 0 \t\trequiere_ensanche = 1\n");
-            requiere_ensanche = 1;
-            cinta = 0;
-            break;
-
-        default:
-            break;
-        }
-
-        p = p->sig;
-    }
-    printf("fin de la simulacion\n\n");
-}
-
-**/

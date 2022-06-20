@@ -136,10 +136,8 @@ int main()
     // Utilizar diferente semilla en cada llamada a rand()
     srand(time(NULL));
 
-    cout << "\n\n\tBienvenido a la simulacion de ajedrez\n"
-         << endl;
-    cout << "  Desea ver las listas de eventos aleatorios que se generen? \n  Aplica a todas las simulaciones\n"
-         << endl;
+    cout << "\n\n\tBienvenido a la simulacion de ajedrez\n" << endl;
+    cout << "  Desea ver las listas de eventos aleatorios que se generen? \n  Aplica a todas las simulaciones\n" << endl;
 
     if (recibir_entrada() == 'S')
         imprimir = true;

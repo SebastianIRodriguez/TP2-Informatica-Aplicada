@@ -37,8 +37,6 @@ public:
     }
 };
 
-// *******************************************  CLASE DE LA LISTA ENLAZADA
-
 class Lista_Enlazada
 {
 private:
@@ -66,14 +64,12 @@ private:
     }
 
 public:
-    // **************************************  CONSTRUCTOR
     Lista_Enlazada(int largo)
     {
         cabecera = crear_lista_eventos(largo);
         nodo_actual = cabecera;
     }
 
-    // **************************************  DESTRUCTOR
     ~Lista_Enlazada()
     {
         liberar_memoria(cabecera);
@@ -91,6 +87,7 @@ public:
         cout << "Boton:" << p->get_boton() << " Fin:" << p->get_fin() << endl;
     }
 
+    //Retorna el nodo actual y avanza una posicion en la lista
     Mediciones *get_nodo()
     {
         Evento *aux = nodo_actual;

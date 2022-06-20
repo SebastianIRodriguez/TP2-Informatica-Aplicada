@@ -131,9 +131,9 @@ int main()
     int c_eventos;
     bool imprimir = false;
 
-    // Utilizar diferente semilla en cada llamada a rand()
     setbuf(stdout, 0);
 
+    // Utilizar diferente semilla en cada llamada a rand()
     srand(time(NULL));
 
     cout << "\n\n\tBienvenido a la simulacion de ajedrez\n"

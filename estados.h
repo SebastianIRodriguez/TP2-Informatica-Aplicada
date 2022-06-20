@@ -1,3 +1,8 @@
+/*
+En este archivo header definimos las clases utilizadas
+en el patrón State
+*/
+
 enum Etiqueta
 {
     REPOSO,

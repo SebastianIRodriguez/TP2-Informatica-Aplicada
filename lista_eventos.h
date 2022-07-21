@@ -2,6 +2,8 @@
 En este archivo header definimos las clases utilizadas
 en el manejo de la lista enlazada
 */
+#ifndef LISTA_EVENTOS
+#define LISTA_EVENTOS
 
 class Mediciones
 {
@@ -98,3 +100,5 @@ public:
         return aux;
     }
 };
+
+#endif

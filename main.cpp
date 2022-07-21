@@ -1,4 +1,5 @@
 #include <iostream>
+#include <queue>
 using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,8 +21,7 @@ char recibir_entrada()
     while (true)
     {
         cout << "Ingrese su respuesta (S/N): " << endl;
-        scanf("%c", &c);
-        getchar();
+        cin >> c;
 
         c = toupper(c);
 
@@ -51,82 +51,224 @@ void correr_simulacion(Lista_Enlazada *lista)
         boton = medicion->get_boton();
         fin = medicion->get_fin();
 
-        // El jugador 1 presiona el botón por primera vez
-        if (boton == 0 && estado_actual->get_etiqueta() == REPOSO)
-        {
-            delete estado_actual;
-            estado_actual = new Turno_J1_Boton_Pulsado();
-        }
-        // Si el jugador 1 suelta el botón
-        else if (boton == 1 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J1_BOTON_PULSADO)
-        {
-            delete estado_actual;
-            estado_actual = new Turno_J1();
-        }
-        // El jugador 2 presiona el botón
-        else if (boton == 0 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J1)
-        {
-            delete estado_actual;
-            estado_actual = new Turno_J2_Boton_Pulsado();
-        }
-        // El jugador 2 suelta el botón
-        else if (boton == 1 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J2_BOTON_PULSADO)
-        {
-            delete estado_actual;
-            estado_actual = new Turno_J2();
-        }
-        // El jugador 1 vuelve a presionar el boton
-        else if (boton == 0 && fin == 0 && estado_actual->get_etiqueta() == TURNO_J2)
-        {
-            delete estado_actual;
-            estado_actual = new Turno_J1_Boton_Pulsado();
-        }
-        // Se le termina el tiempo al jugador 1
-        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J1_BOTON_PULSADO)
-        {
-            delete estado_actual;
-            estado_actual = new Termina_Tiempo_J1();
-        }
-        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J2)
-        {
-            delete estado_actual;
-            estado_actual = new Termina_Tiempo_J1();
-        }
-        // Se le termina el tiempo al jugador 2
-        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J2_BOTON_PULSADO)
-        {
-            delete estado_actual;
-            estado_actual = new Termina_Tiempo_J2();
-        }
-        else if (boton == 0 && fin == 1 && estado_actual->get_etiqueta() == TURNO_J1)
-        {
-            delete estado_actual;
-            estado_actual = new Termina_Tiempo_J2();
-        }
-        // Vuelve a reset despues de que se les termina el tiempo
-        else if (boton == 1 && fin == 1 && (estado_actual->get_etiqueta() == TERMINA_TIEMPO_J1 || estado_actual->get_etiqueta() == TERMINA_TIEMPO_J2))
-        {
-            delete estado_actual;
-            estado_actual = new Reposo();
-        }
-        // Se pide un reset
-        else if (boton == 1 && fin == 1 && (estado_actual->get_etiqueta() == TURNO_J1 || estado_actual->get_etiqueta() == TURNO_J2 || estado_actual->get_etiqueta() == TURNO_J2_BOTON_PULSADO || estado_actual->get_etiqueta() == TURNO_J1_BOTON_PULSADO))
-        {
-            delete estado_actual;
-            estado_actual = new Reposo();
-        }
-        else
-        {
-            // Estado imposible o irrelevante
-            continue;
+        Estado *nuevo_estado = NULL;
+
+        switch(estado_actual->get_etiqueta()) {
+            case REPOSO:
+                // El jugador 1 presiona el botón por primera vez
+                if(boton == 0) {
+                    nuevo_estado = new Turno_J1_Boton_Pulsado();
+                }
+                break;
+
+            case TURNO_J1_BOTON_PULSADO:
+                // Si el jugador 1 suelta el botón
+                if(boton == 1 && fin == 0) {
+                    nuevo_estado = new Turno_J1();
+                }
+                // Se le termina el tiempo al jugador 1
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J1();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TURNO_J1:
+                //El jugador 2 presiona el botón
+                if(boton == 0 && fin == 0) {
+                    nuevo_estado = new Turno_J2_Boton_Pulsado();
+                }
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J2();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TURNO_J2_BOTON_PULSADO:
+                //El jugador 2 suelta el botón
+                if(boton == 1 && fin == 0) {
+                    nuevo_estado = new Turno_J2();
+                }
+                //Se le termina el tiempo al jugador 2
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J2();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TURNO_J2:
+                //El jugador 1 vuelve a presionar el boton
+                if(boton == 0 && fin == 0) {
+                    nuevo_estado = new Turno_J1_Boton_Pulsado();
+                }
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J1();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TERMINA_TIEMPO_J1:
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TERMINA_TIEMPO_J2:
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            default:
+                break;
         }
 
-        estado_actual->imprimir_estado();
+        if(nuevo_estado != NULL) {
+            delete estado_actual;
+            estado_actual = nuevo_estado;
+            estado_actual->imprimir_estado();
+        }
     }
     cout << "\nFin de la simulacion\n" << endl;
 }
 
-int main()
+void _correr_simulacion(queue<Evento> cola)
+{
+    Estado *estado_actual = new Reposo();
+
+    estado_actual->imprimir_estado();
+
+    bool boton, fin;
+
+    while (!cola.empty())
+    {
+        Evento medicion = cola.front();
+        cola.pop();
+        boton = medicion.get_boton();
+        fin = medicion.get_fin();
+
+        Estado *nuevo_estado = NULL;
+
+        switch(estado_actual->get_etiqueta()) {
+            case REPOSO:
+                // El jugador 1 presiona el botón por primera vez
+                if(boton == 0) {
+                    nuevo_estado = new Turno_J1_Boton_Pulsado();
+                }
+                break;
+
+            case TURNO_J1_BOTON_PULSADO:
+                // Si el jugador 1 suelta el botón
+                if(boton == 1 && fin == 0) {
+                    nuevo_estado = new Turno_J1();
+                }
+                // Se le termina el tiempo al jugador 1
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J1();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TURNO_J1:
+                //El jugador 2 presiona el botón
+                if(boton == 0 && fin == 0) {
+                    nuevo_estado = new Turno_J2_Boton_Pulsado();
+                }
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J2();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TURNO_J2_BOTON_PULSADO:
+                //El jugador 2 suelta el botón
+                if(boton == 1 && fin == 0) {
+                    nuevo_estado = new Turno_J2();
+                }
+                //Se le termina el tiempo al jugador 2
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J2();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TURNO_J2:
+                //El jugador 1 vuelve a presionar el boton
+                if(boton == 0 && fin == 0) {
+                    nuevo_estado = new Turno_J1_Boton_Pulsado();
+                }
+                if(boton == 0 && fin == 1) {
+                    nuevo_estado = new Termina_Tiempo_J1();
+                }
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TERMINA_TIEMPO_J1:
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            case TERMINA_TIEMPO_J2:
+                //Reset
+                if(boton == 1 && fin == 1) {
+                    nuevo_estado = new Reposo();
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        cout << "Boton: "<< boton <<"  Fin: \n" << fin << "\t\t";
+
+        if(nuevo_estado != NULL) {
+            delete estado_actual;
+            estado_actual = nuevo_estado;
+            estado_actual->imprimir_estado();
+        }
+    }
+    cout << "\nFin de la simulacion\n" << endl;
+}
+
+
+queue<Evento>* crear_cola_eventos(int cant_eventos) {
+    queue<Evento>* cola = new queue<Evento>();
+    for(int i = 0; i < cant_eventos; i++) {
+        Evento evento(rand() % 2, rand() % 2, NULL);
+        cola->push(evento);
+    }
+    return cola;
+}
+
+int _main()
 {
     int c_eventos;
     bool imprimir = false;
@@ -147,18 +289,19 @@ int main()
         cout << "Ingrese la cantidad de eventos aleatorios que desea crear: " << endl;
 
         // Leemos la cantidad de eventos
-        scanf("%d", &c_eventos);
-        getchar(); // Descarta el \n
+        cin >> c_eventos;
 
         // Creamos la lista
         Lista_Enlazada *lista = new Lista_Enlazada(c_eventos);
+        queue<Evento> *_lista = crear_cola_eventos(c_eventos);
 
         if (imprimir)
             lista->imprimir_lista();
 
-        correr_simulacion(lista);
+        _correr_simulacion(*_lista);
 
         delete lista;
+        delete _lista;
 
         cout << "Desea realizar otra simulacion?" << endl;
 
@@ -168,3 +311,39 @@ int main()
 
     return 0;
 }
+
+  void resta(queue<int> myqueue)
+  {
+    myqueue.front() -= myqueue.back();    // 77-16=61
+    std::cout << "myqueue.front() is now " << myqueue.front() << '\n';
+  }
+
+
+int main ()
+{
+  std::queue<int> myqueue;
+  
+  myqueue.push(77);
+  myqueue.push(16);
+
+  const std::queue<int> cola = myqueue;
+
+  myqueue.front() = 82;    // 77-16=61
+
+  std::cout << "myqueue.front() is now " << myqueue.front() << '\n';
+
+  return 0;
+}
+
+/*
+
+Volar a la mierda la clase Lista_Enlazada y reemplazarlo por std::queue
+    - Medición dejaría de existir
+    
+Reemplazar los if en la parte de la maquina de estados con switch/case      - LISTO
+Usar cin en vez de scanf y getchar                                          - LISTO
+Las salidas deberian verse exactamente igual que en el enunciado            - WTF
+No podemos tener el algoritmo principal dentro de la funcion global main, hay que meterlo dentro de una clase Context
+
+
+*/

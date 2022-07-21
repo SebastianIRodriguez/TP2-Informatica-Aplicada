@@ -2,6 +2,8 @@
 En este archivo header definimos las clases utilizadas
 en el patrón State
 */
+#ifndef ESTADOS
+#define ESTADOS
 
 enum Etiqueta
 {
@@ -98,3 +100,5 @@ public:
         cout << "Fin del tiempo 2" << endl;
     }
 };
+
+#endif

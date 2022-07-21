@@ -42,13 +42,13 @@ private:
 
     void correr_simulacion(queue<Evento> cola)
     {
-        Estado *estado_actual = new Reposo();
+        Etiqueta estado_actual = REPOSO;
 
         bool boton, fin;
 
         cout << "Boton: "<< boton <<"  Fin: " << fin << "\t" << "Relevante  \t";
 
-        estado_actual->handle();
+        cout << "Cronometro en reposo: \t\t\t ENA1 = 0 ENA2 = 0\t\t" << endl;
 
         while (!cola.empty())
         {
@@ -57,85 +57,95 @@ private:
             boton = medicion.get_boton();
             fin = medicion.get_fin();
 
-            Estado *nuevo_estado = NULL;
+            Etiqueta nuevo_estado = estado_actual;
 
-            switch(estado_actual->get_etiqueta()) {
+            cout << "Boton: " << boton << "  Fin: " << fin << "\t";
+
+            switch(estado_actual) {
+
                 case REPOSO:
+                    cout << "Cronometro en reposo: \t\t\t ENA1 = 0 ENA2 = 0\t";
                     // El jugador 1 presiona el botón por primera vez
                     if(boton == 0) {
-                        nuevo_estado = new Turno_J1_Boton_Pulsado();
+                        nuevo_estado = TURNO_J1_BOTON_PULSADO;
                     }
                     break;
 
                 case TURNO_J1_BOTON_PULSADO:
+                    cout << "Tiempo 1 corriendo con boton apretado:   ENA1 = 1 ENA2 = 0\t";
                     // Si el jugador 1 suelta el botón
                     if(boton == 1 && fin == 0) {
-                        nuevo_estado = new Turno_J1();
+                        nuevo_estado = TURNO_J1;
                     }
                     // Se le termina el tiempo al jugador 1
                     if(boton == 0 && fin == 1) {
-                        nuevo_estado = new Termina_Tiempo_J1();
+                        nuevo_estado = TERMINA_TIEMPO_J1;
                     }
                     //Reset
                     if(boton == 1 && fin == 1) {
-                        nuevo_estado = new Reposo();
+                        nuevo_estado = REPOSO;
                     }
                     break;
 
                 case TURNO_J1:
+                    cout << "Tiempo 1 corriendo sin apretar boton:    ENA1 = 1 ENA2 = 0\t";
                     //El jugador 2 presiona el botón
                     if(boton == 0 && fin == 0) {
-                        nuevo_estado = new Turno_J2_Boton_Pulsado();
+                        nuevo_estado = TURNO_J2_BOTON_PULSADO;
                     }
                     if(boton == 0 && fin == 1) {
-                        nuevo_estado = new Termina_Tiempo_J2();
+                        nuevo_estado = TERMINA_TIEMPO_J2;
                     }
                     //Reset
                     if(boton == 1 && fin == 1) {
-                        nuevo_estado = new Reposo();
+                        nuevo_estado = REPOSO;
                     }
                     break;
 
                 case TURNO_J2_BOTON_PULSADO:
+                    cout << "Tiempo 2 corriendo con boton apretado:   ENA1 = 0 ENA2 = 1\t";
                     //El jugador 2 suelta el botón
                     if(boton == 1 && fin == 0) {
-                        nuevo_estado = new Turno_J2();
+                        nuevo_estado = TURNO_J2;
                     }
                     //Se le termina el tiempo al jugador 2
                     if(boton == 0 && fin == 1) {
-                        nuevo_estado = new Termina_Tiempo_J2();
+                        nuevo_estado = TERMINA_TIEMPO_J2;
                     }
                     //Reset
                     if(boton == 1 && fin == 1) {
-                        nuevo_estado = new Reposo();
+                        nuevo_estado = REPOSO;
                     }
                     break;
 
                 case TURNO_J2:
+                    cout << "Tiempo 2 corriendo sin apretar boton:    ENA1 = 0 ENA2 = 1\t";
                     //El jugador 1 vuelve a presionar el boton
                     if(boton == 0 && fin == 0) {
-                        nuevo_estado = new Turno_J1_Boton_Pulsado();
+                        nuevo_estado = TURNO_J1_BOTON_PULSADO;
                     }
                     if(boton == 0 && fin == 1) {
-                        nuevo_estado = new Termina_Tiempo_J1();
+                        nuevo_estado = TERMINA_TIEMPO_J1;
                     }
                     //Reset
                     if(boton == 1 && fin == 1) {
-                        nuevo_estado = new Reposo();
+                        nuevo_estado = REPOSO;
                     }
                     break;
 
                 case TERMINA_TIEMPO_J1:
+                    cout << "Fin del tiempo 1\t\t\t\t\t\t";
                     //Reset
                     if(boton == 1 && fin == 1) {
-                        nuevo_estado = new Reposo();
+                        nuevo_estado = REPOSO;
                     }
                     break;
 
                 case TERMINA_TIEMPO_J2:
+                    cout << "Fin del tiempo 2\t\t\t\t\t\t";
                     //Reset
                     if(boton == 1 && fin == 1) {
-                        nuevo_estado = new Reposo();
+                        nuevo_estado = REPOSO;
                     }
                     break;
 
@@ -143,17 +153,14 @@ private:
                     break;
             }
 
-            if(nuevo_estado == NULL) 
+            if(nuevo_estado == estado_actual) 
             {
-                cout << "No modifica \t";
-                estado_actual->handle();
+                cout << "No modifica\n";
             }
             else
             {
-                cout << "Relevante  \t";
-                delete estado_actual;
+                cout << "Relevante\n";
                 estado_actual = nuevo_estado;
-                estado_actual->handle();
             }
         }
         cout << "\nFin de la simulacion\n" << endl;
@@ -202,11 +209,13 @@ public:
                 break;
         }
     }
-}
+};
 
 int main() {
     SimuladorCronometro cronometro;
     cronometro.exec();
+
+    return 0;
 }
 
 /*

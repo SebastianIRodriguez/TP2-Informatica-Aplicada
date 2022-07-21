@@ -31,7 +31,6 @@ public:
     Etiqueta get_etiqueta() { return REPOSO; }
     void handle()
     {
-        cout << "Cronometro en reposo: \t\t\t ENA1 = 0 ENA2 = 0\t\t" << endl;
     }
 };
 
@@ -42,7 +41,6 @@ public:
     Etiqueta get_etiqueta() { return TURNO_J1_BOTON_PULSADO; }
     void handle()
     {
-        cout << "Tiempo 1 corriendo con boton apretado:   ENA1 = 1 ENA2 = 0\t\t" << endl;
     }
 };
 
@@ -53,7 +51,6 @@ public:
     Etiqueta get_etiqueta() { return TURNO_J1; }
     void handle()
     {
-        cout << "Tiempo 1 corriendo sin apretar boton:    ENA1 = 1 ENA2 = 0\t\t" << endl;
     }
 };
 
@@ -64,7 +61,6 @@ public:
     Etiqueta get_etiqueta() { return TURNO_J2_BOTON_PULSADO; }
     void handle()
     {
-        cout << "Tiempo 2 corriendo con boton apretado:   ENA1 = 0 ENA2 = 1\t\t" << endl;
     }
 };
 
@@ -75,7 +71,6 @@ public:
     Etiqueta get_etiqueta() { return TURNO_J2; }
     void handle()
     {
-        cout << "Tiempo 2 corriendo sin apretar boton:    ENA1 = 0 ENA2 = 1\t\t" << endl;
     }
 };
 
@@ -86,7 +81,6 @@ public:
     Etiqueta get_etiqueta() { return TERMINA_TIEMPO_J1; }
     void handle()
     {
-        cout << "Fin del tiempo 1" << endl;
     }
 };
 
@@ -97,7 +91,6 @@ public:
     Etiqueta get_etiqueta() { return TERMINA_TIEMPO_J2; }
     void handle()
     {
-        cout << "Fin del tiempo 2" << endl;
     }
 };
 

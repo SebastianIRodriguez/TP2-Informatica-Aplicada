@@ -225,7 +225,7 @@ int main() {
 
     while (true)
     {
-        cout << "Ingrese la cantidad de eventos aleatorios que desea crear: " << endl;
+        cout << "Ingrese la cantidad de eventos aleatorios que desea crear: " ;
 
         // Leemos la cantidad de eventos
         cin >> c_eventos;
